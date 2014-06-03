@@ -23,7 +23,7 @@ package de.flapdoodle.embed.process.runtime;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +36,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.flapdoodle.embed.process.config.ISupportConfig;
-import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.config.process.ProcessConfig;
 import de.flapdoodle.embed.process.io.Processors;
 
@@ -45,209 +44,152 @@ import de.flapdoodle.embed.process.io.Processors;
  */
 public class ProcessControl {
 
-	private static Logger logger = Logger.getLogger(ProcessControl.class.getName());
-	private static final int SLEEPT_TIMEOUT = 10;
+    private static Logger logger = Logger.getLogger(ProcessControl.class.getName());
+    private static final int SLEEPT_TIMEOUT = 10;
 
-	private Process process;
+    private Process process;
 
-	private InputStreamReader reader;
-	private InputStreamReader error;
+    private InputStreamReader reader;
+    private InputStreamReader error;
 
-	private Integer pid;
+    private Integer pid;
 
-	private ISupportConfig runtime;
+    private ISupportConfig runtime;
 
-	public ProcessControl(ISupportConfig runtime, Process process) {
-		this.process = process;
-		this.runtime = runtime;
-		reader = new InputStreamReader(this.process.getInputStream());
-		error = new InputStreamReader(this.process.getErrorStream());
-		pid = Processes.processId(this.process);
-	}
+    public ProcessControl(ISupportConfig runtime, Process process) {
 
-	public Reader getReader() {
-		return reader;
-	}
+        this.process = process;
+        this.runtime = runtime;
+        reader = new InputStreamReader(this.process.getInputStream());
+        error = new InputStreamReader(this.process.getErrorStream());
+        pid = Processes.processId(this.process);
+    }
 
-	public InputStreamReader getError() {
-		return error;
-	}
+    public Reader getReader() {
 
-	public int stop() {
-		return waitForProcessGotKilled();
-	}
+        return reader;
+    }
 
-	private void closeIOAndDestroy() {
-		if (process != null) {
-			try {
-				// streams need to be closed, otherwise process may block
-				// see http://kylecartmell.com/?p=9
-				process.getErrorStream().close();
-				process.getInputStream().close();
-				process.getOutputStream().close();
+    public InputStreamReader getError() {
 
-			} catch (IOException e) {
-				logger.severe(e.getMessage());
-			}
-			reader = null;
-		}
-	}
+        return error;
+    }
 
-	private Integer stopOrDestroyProcess() {
-		Integer returnCode=null;
-		
-		try {
-			returnCode=process.exitValue();
-		} catch (IllegalThreadStateException itsx) {
-		    	logger.info("stopOrDestroyProcess: "+itsx.getMessage() +" "+((itsx.getCause()!=null) ? itsx.getCause() : "") );
-			Callable<Integer> callable=new Callable<Integer>() {
-				
-				@Override
-				public Integer call() throws Exception {
-					return process.waitFor();
-				}
-			};
-			FutureTask<Integer> task = new FutureTask<Integer>(callable);
-			new Thread(task).start();
+    public int stop() {
 
-			boolean stopped=false;
-			try {
-				returnCode=task.get(100, TimeUnit.MILLISECONDS);
-				stopped=true;
-			} catch (InterruptedException e) {
-			} catch (ExecutionException e) {
-			} catch (TimeoutException e) {
-			}
-			
-			closeIOAndDestroy();
-			
-			try {
-				returnCode=task.get(900, TimeUnit.MILLISECONDS);
-				stopped=true;
-			} catch (InterruptedException e) {
-			} catch (ExecutionException e) {
-			} catch (TimeoutException e) {
-			}
+        return waitForProcessGotKilled();
+    }
 
-			try {
-				returnCode=task.get(2000, TimeUnit.MILLISECONDS);
-				stopped=true;
-			} catch (InterruptedException e) {
-			} catch (ExecutionException e) {
-			} catch (TimeoutException e) {
-			}
+    private Integer stopOrDestroyProcess() {
 
-			if (!stopped)	{
-//				logger.severe(""+runtime.getName()+" NOT exited, thats why we destroy");
-				process.destroy();
-			}
-		}
-		
-		return returnCode;
-	}
+        if (process.isAlive()) {
+            for (int timeout : Arrays.asList(100, 1000, 2000)) {
+                try {
+                    process.waitFor(timeout, TimeUnit.MILLISECONDS);
+                    if (!process.isAlive()) {
+                        break;
+                    }
+                } catch (InterruptedException e) {
+                }
+            }
+            if (process.isAlive()) {
+                process = process.destroyForcibly();
+            }
+        }
+        return process.exitValue();
+    }
 
-	//CHECKSTYLE:OFF
+    //CHECKSTYLE:OFF
 
-	/**
-	 * It may happen in tests, that the process is currently using some files in
-	 * the temp directory, e.g. journal files (journal/j._0) and got killed at
-	 * that time, so it takes a bit longer to kill the process. So we just wait
-	 * for a second (in 10 ms steps) that the process got really killed.
-	 */
-	private int waitForProcessGotKilled() {
-//		final ProcessState state = new ProcessState();
+    /**
+     * It may happen in tests, that the process is currently using some files in
+     * the temp directory, e.g. journal files (journal/j._0) and got killed at
+     * that time, so it takes a bit longer to kill the process. So we just wait
+     * for a second (in 10 ms steps) that the process got really killed.
+     */
+    private int waitForProcessGotKilled() {
 
-//		final Timer timer = new Timer();
-//		timer.scheduleAtFixedRate(new TimerTask() {
-//
-//			public void run() {
-//				try {
-//					state.returnCode = process.waitFor();
-//				} catch (InterruptedException e) {
-//					logger.severe(e.getMessage());
-//				} finally {
-//					state.setKilled(true);
-//					timer.cancel();
-//				}
-//			}
-//		}, 0, 10);
-//		// wait for max. 1 second that process got killed
-		Integer retCode=stopOrDestroyProcess();
+        Integer retCode = stopOrDestroyProcess();
+        if (retCode == null) {
+            String message = "\n\n" + "----------------------------------------------------\n"
+                    + "Something bad happend. We couldn't kill " + runtime.getName() + " process, and tried a lot.\n"
+                    + "If you want this problem solved you can help us if you open a new issue.\n" + "\n"
+                    + "Follow this link:\n" + runtime.getSupportUrl() +
+                    "\n"
+                    + "Thank you:)\n" + "----------------------------------------------------\n\n";
+            throw new IllegalStateException("Couldn't kill " + runtime.getName() + " process!" + message);
+        }
+        return retCode;
+    }
 
-//		int countDown = 100;
-//		while (!state.isKilled() && (countDown-- > 0))
-//			try {
-//				Thread.sleep(10);
-//			} catch (InterruptedException e) {
-//				logger.severe(e.getMessage());
-//				Thread.currentThread().interrupt();
-//			}
-		if (retCode==null) {
-//			timer.cancel();
-			String message = "\n\n" + "----------------------------------------------------\n"
-					+ "Something bad happend. We couldn't kill "+runtime.getName()+" process, and tried a lot.\n"
-					+ "If you want this problem solved you can help us if you open a new issue.\n" + "\n"
-					+ "Follow this link:\n" + runtime.getSupportUrl() +
-					"\n"
-					+ "Thank you:)\n" + "----------------------------------------------------\n\n";
-			throw new IllegalStateException("Couldn't kill "+runtime.getName()+" process!" + message);
-		}
-		return retCode;
-	}
+    //CHECKSTYLE:ON
+    public static ProcessControl fromCommandLine(ISupportConfig runtime, List<String> commandLine, boolean redirectErrorStream)
+            throws IOException {
 
-	//CHECKSTYLE:ON
-	public static ProcessControl fromCommandLine(ISupportConfig runtime, List<String> commandLine, boolean redirectErrorStream)
-			throws IOException {
-		ProcessBuilder processBuilder = newProcessBuilder(commandLine, redirectErrorStream);
-		return start(runtime, processBuilder);
-	}
+        ProcessBuilder processBuilder = newProcessBuilder(commandLine, redirectErrorStream);
+        return start(runtime, processBuilder);
+    }
 
-	public static ProcessControl start(ISupportConfig runtime, ProcessBuilder processBuilder) throws IOException {
-		return new ProcessControl(runtime, processBuilder.start());
-	}
+    public static ProcessControl start(ISupportConfig runtime, ProcessBuilder processBuilder) throws IOException {
 
-	public static ProcessBuilder newProcessBuilder(List<String> commandLine, boolean redirectErrorStream) {
-		return newProcessBuilder(commandLine,new HashMap<String,String>(), redirectErrorStream);
-	}
-	
-	public static ProcessBuilder newProcessBuilder(List<String> commandLine, Map<String,String> environment, boolean redirectErrorStream) {
-		ProcessBuilder processBuilder = new ProcessBuilder(commandLine);
-		if (!environment.isEmpty()){
-			processBuilder.environment().putAll(environment);
-		}
-		if (redirectErrorStream)
-			processBuilder.redirectErrorStream();
-		return processBuilder;
-	}
+        return new ProcessControl(runtime, processBuilder.start());
+    }
 
-	public static boolean executeCommandLine(ISupportConfig support, String label, ProcessConfig processConfig) {
-		boolean ret = false;
+    public static ProcessBuilder newProcessBuilder(List<String> commandLine, boolean redirectErrorStream) {
 
-		List<String> commandLine = processConfig.getCommandLine();
-		try {
-			ProcessControl process = fromCommandLine(support, processConfig.getCommandLine(), processConfig.getError() == null);
-			Processors.connect(process.getReader(), processConfig.getOutput());
-			Thread.sleep(SLEEPT_TIMEOUT);
-			ret = process.stop() == 0;
-			logger.info("execSuccess: " + ret + " " + commandLine);
-			return ret;
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, "" + commandLine, e);
-		} catch (InterruptedException e) {
-			logger.log(Level.SEVERE, "" + commandLine, e);
-		}
-		return false;
-	}
+        return newProcessBuilder(commandLine, new HashMap<String, String>(), redirectErrorStream);
+    }
 
-	public int waitFor() throws InterruptedException {
-		return process.waitFor();
-	}
+    public static ProcessBuilder newProcessBuilder(List<String> commandLine, Map<String, String> environment, boolean redirectErrorStream) {
 
-	public static void addShutdownHook(Runnable runable) {
-		Runtime.getRuntime().addShutdownHook(new Thread(runable));
-	}
-	
-	public Integer getPid() {
-		return pid;
-	}
+        ProcessBuilder processBuilder = new ProcessBuilder(commandLine);
+        if (!environment.isEmpty()) {
+            processBuilder.environment().putAll(environment);
+        }
+        if (redirectErrorStream) {
+            processBuilder.redirectErrorStream();
+        }
+        return processBuilder;
+    }
+
+    public static boolean executeCommandLine(ISupportConfig support, String label, ProcessConfig processConfig) {
+
+        boolean ret = false;
+
+        List<String> commandLine = processConfig.getCommandLine();
+        try {
+            ProcessControl process = fromCommandLine(support, processConfig.getCommandLine(), processConfig.getError() == null);
+            Processors.connect(process.getReader(), processConfig.getOutput());
+            Thread.sleep(SLEEPT_TIMEOUT);
+            ret = process.stop() == 0;
+            logger.info("execSuccess: " + ret + " " + commandLine);
+            return ret;
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "" + commandLine, e);
+        } catch (InterruptedException e) {
+            logger.log(Level.SEVERE, "" + commandLine, e);
+        }
+        return false;
+    }
+
+    public int waitFor() throws InterruptedException {
+
+        return process.waitFor();
+    }
+
+    public static void addShutdownHook(Runnable runable) {
+
+        Runtime.getRuntime().addShutdownHook(new Thread(runable));
+    }
+
+    public Integer getPid() {
+
+        return pid;
+    }
+
+    public boolean isProcessAlive() {
+
+        return process != null && process.isAlive();
+    }
+
 }

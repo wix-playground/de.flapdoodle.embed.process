@@ -32,6 +32,8 @@ import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.GenericVersion;
 import de.flapdoodle.embed.process.distribution.IVersion;
 
+import static org.junit.Assert.assertFalse;
+
 public class TestExampleReadMeCode {
 
 	/*
@@ -58,11 +60,10 @@ public class TestExampleReadMeCode {
 		GenericStarter starter = new GenericStarter(config);
 		
 		GenericExecuteable executable = starter.prepare(new GenericProcessConfig(version));
-		
-		GenericProcess process = executable.start();
-		
-		process.stop();
-		
-		executable.stop();
-	}
+
+        GenericProcess process = executable.start();
+        process.stop();
+        assertFalse(process.isProcessAlive());
+        executable.stop();
+    }
 }

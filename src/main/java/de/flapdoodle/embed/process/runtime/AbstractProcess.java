@@ -228,6 +228,10 @@ public abstract class AbstractProcess<T extends IExecutableProcessConfig, E exte
 		return pid!=null ? pid : processId;
 	}
 
+    public boolean isProcessAlive() {
+        return process.isProcessAlive();
+    }
+
 	/**
 	 *
 	 */
