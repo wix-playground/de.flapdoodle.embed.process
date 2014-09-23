@@ -22,6 +22,7 @@ package de.flapdoodle.embed.process.example;
 
 import java.io.IOException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
@@ -32,6 +33,7 @@ import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.GenericVersion;
 import de.flapdoodle.embed.process.distribution.IVersion;
 
+@Ignore
 public class TestExampleReadMeCode {
 
 	/*

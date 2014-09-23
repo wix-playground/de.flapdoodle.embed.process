@@ -23,6 +23,8 @@ package de.flapdoodle.embed.process.extract;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import de.flapdoodle.embed.process.config.store.FileSet;
@@ -31,6 +33,7 @@ import de.flapdoodle.embed.process.config.store.FileSet.Entry;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.io.file.FileAlreadyExistsException;
 import de.flapdoodle.embed.process.io.file.Files;
+import org.apache.commons.io.FileUtils;
 
 public class FilesToExtract {
 
@@ -75,8 +78,16 @@ public class FilesToExtract {
 		}
 		return found!=null ? new Match(_dirFactoryResult,_exeutableNaming, found) : null;
 	}
-	
-	static class Match implements IExtractionMatch {
+
+    public IExtractionMatch findPassthrough(IArchiveEntry entry) {
+        if (entry.getName().endsWith("mysqld")) {
+            return new MatchPassthrough(_dirFactoryResult, new Entry(FileType.Executable, entry.getName(), null));
+        } else {
+            return new MatchPassthrough(_dirFactoryResult, new Entry(FileType.Support, entry.getName(), null));
+        }
+    }
+
+    static class Match implements IExtractionMatch {
 
 		private final Entry _entry;
 		private final File _dirFactoryResult;
@@ -119,6 +130,59 @@ public class FilesToExtract {
 		}
 		
 	}
+
+    static class MatchPassthrough implements IExtractionMatch {
+
+        private final Entry _entry;
+        private final File _dirFactoryResult;
+
+        public MatchPassthrough(File dirFactoryResult, Entry entry) {
+            _dirFactoryResult = dirFactoryResult;
+            _entry = entry;
+        }
+
+        @Override
+        public FileType type() {
+            return _entry.type();
+        }
+
+        @Override
+        public File write(InputStream source, long size) throws IOException {
+            File destination = new File(_dirFactoryResult.getAbsolutePath(),  _entry.destination());
+            System.out.println(destination.getAbsolutePath());
+
+            FileUtils.touch(destination);
+            Files.write(source, size, destination);
+
+            if (destination.getAbsolutePath().endsWith("mysqld")) {
+                destination.setExecutable(true);
+            }
+//
+//            switch (_entry.type()) {
+////                Files.write();
+////
+////                case Executable:
+////                    try {
+////                        destination=Files.createTempFile(_dirFactoryResult,_exeutableNaming.nameFor("extract",_entry.destination()));
+////                    } catch (FileAlreadyExistsException ex) {
+////                        throw new ExecutableFileAlreadyExistsException(ex);
+////                    }
+////                    break;
+////                default:
+////                    destination=Files.createTempFile(_dirFactoryResult,_entry.destination());
+////                    break;
+////            }
+////
+//            Files.write(source, size, destination);
+////            switch (_entry.type()) {
+////                case Executable:
+////                    destination.setExecutable(true);
+////                    break;
+////            }
+            return destination;
+        }
+
+    }
 
 
 }
