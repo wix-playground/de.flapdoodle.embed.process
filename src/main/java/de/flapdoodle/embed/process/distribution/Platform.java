@@ -30,18 +30,29 @@ public enum Platform {
 	Solaris,
 	FreeBSD;
 
+    private String osVersion;
+
+    private Platform withOsVersion(final String version) {
+        osVersion = version;
+        return this;
+    }
+    public String getOsVersion() {
+        return osVersion;
+    }
+
 	public static Platform detect() {
 		String osName = System.getProperty("os.name");
+        String osVersion = System.getProperty("os.version");
 		if (osName.equals("Linux"))
-			return Linux;
+			return Linux.withOsVersion(osVersion);
 		if (osName.startsWith("Windows", 0))
-			return Windows;
+			return Windows.withOsVersion(osVersion);
 		if (osName.equals("Mac OS X"))
-			return OS_X;
+			return OS_X.withOsVersion(osVersion);
 		if (osName.contains("SunOS"))
-			return Solaris;
+			return Solaris.withOsVersion(osVersion);
 		if (osName.equals("FreeBSD"))
-			return FreeBSD;
+			return FreeBSD.withOsVersion(osVersion);
 		throw new IllegalArgumentException("Could not detect Platform: os.name=" + osName);
 	}
 	
