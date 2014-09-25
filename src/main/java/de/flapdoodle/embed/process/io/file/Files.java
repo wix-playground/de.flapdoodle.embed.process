@@ -60,6 +60,12 @@ public class Files {
 
 	public static File createTempFile(File tempDir, String tempFileName) throws IOException, FileAlreadyExistsException {
 		File tempFile = new File(tempDir, tempFileName);
+
+        File parent = tempFile.getParentFile();
+        if(!parent.exists() && !parent.mkdirs()) {
+            throw new IllegalStateException("Couldn't create dir: " + parent);
+        }
+
 		if (!tempFile.createNewFile())
 			throw new FileAlreadyExistsException("Could not create Tempfile",tempFile);
 		return tempFile;
