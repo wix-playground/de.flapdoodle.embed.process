@@ -68,7 +68,7 @@ public abstract class AbstractExtractor implements IExtractor {
 			ArchiveEntry entry;
 			while ((entry = archive.getNextEntry()) != null) {
 
-				IExtractionMatch match = toExtract.findPassthrough(new CommonsArchiveEntryAdapter(entry));
+				IExtractionMatch match = toExtract.find(new CommonsArchiveEntryAdapter(entry));
 				if (match != null) {
 					if (archive.canReadEntryData(entry)) {
 						long size = entry.getSize();

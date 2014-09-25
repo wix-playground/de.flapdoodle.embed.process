@@ -20,31 +20,22 @@
  */
 package de.flapdoodle.embed.process.extract;
 
-import static org.junit.Assert.*;
+import de.flapdoodle.embed.process.config.store.*;
+import de.flapdoodle.embed.process.config.store.FileSet.Entry;
+import de.flapdoodle.embed.process.example.GenericPackageResolver;
+import de.flapdoodle.embed.process.extract.produce.IDestinationFileProducer;
+import de.flapdoodle.embed.process.extract.produce.TempFileNamingProducer;
+import de.flapdoodle.embed.process.io.directories.IDirectory;
+import de.flapdoodle.embed.process.io.directories.PlatformTempDir;
+import de.flapdoodle.embed.process.io.progress.StandardConsoleProgressListener;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import org.junit.Test;
-
-import de.flapdoodle.embed.process.config.store.DownloadConfigBuilder;
-import de.flapdoodle.embed.process.config.store.FileSet;
-import de.flapdoodle.embed.process.config.store.FileSet.Entry;
-import de.flapdoodle.embed.process.config.store.FileType;
-import de.flapdoodle.embed.process.config.store.IDownloadConfig;
-import de.flapdoodle.embed.process.config.store.IPackageResolver;
-import de.flapdoodle.embed.process.example.GenericPackageResolver;
-import de.flapdoodle.embed.process.extract.AbstractExtractor.ArchiveWrapper;
-import de.flapdoodle.embed.process.io.directories.IDirectory;
-import de.flapdoodle.embed.process.io.directories.PlatformTempDir;
-import de.flapdoodle.embed.process.io.progress.IProgressListener;
-import de.flapdoodle.embed.process.io.progress.StandardConsoleProgressListener;
 
 
 public class AbstractExtractorTest {
@@ -65,11 +56,11 @@ public class AbstractExtractorTest {
 			.build();
 		
 		IDirectory factory=new PlatformTempDir();
-		ITempNaming exeutableNaming=new UUIDTempNaming();
+        IDestinationFileProducer destProducer = new TempFileNamingProducer(new UUIDTempNaming());
 		List<Entry> entries=new ArrayList<Entry>();
 		entries.add(new Entry(FileType.Executable, "foo-bar.exe", Pattern.compile(".")));
 		FileSet fileSet=new FileSet(entries);
-		FilesToExtract filesToExtract=new FilesToExtract(factory, exeutableNaming, fileSet);
+		FilesToExtract filesToExtract=new FilesToExtract(factory, destProducer, fileSet);
 		
 		new AbstractExtractor() {
 			

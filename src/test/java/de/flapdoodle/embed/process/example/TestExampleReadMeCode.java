@@ -20,11 +20,6 @@
  */
 package de.flapdoodle.embed.process.example;
 
-import java.io.IOException;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.config.store.FileSet;
 import de.flapdoodle.embed.process.config.store.FileType;
@@ -32,8 +27,10 @@ import de.flapdoodle.embed.process.distribution.ArchiveType;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.GenericVersion;
 import de.flapdoodle.embed.process.distribution.IVersion;
+import org.junit.Test;
 
-@Ignore
+import java.io.IOException;
+
 public class TestExampleReadMeCode {
 
 	/*
