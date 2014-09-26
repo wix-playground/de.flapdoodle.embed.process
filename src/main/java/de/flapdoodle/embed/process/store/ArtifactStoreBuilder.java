@@ -20,7 +20,6 @@
  */
 package de.flapdoodle.embed.process.store;
 
-import java.util.Map;
 import java.util.logging.Logger;
 
 import de.flapdoodle.embed.process.builder.AbstractBuilder;
@@ -28,17 +27,16 @@ import de.flapdoodle.embed.process.builder.IProperty;
 import de.flapdoodle.embed.process.builder.TypedProperty;
 import de.flapdoodle.embed.process.config.store.IDownloadConfig;
 import de.flapdoodle.embed.process.config.store.ILibraryStore;
-import de.flapdoodle.embed.process.distribution.Platform;
 import de.flapdoodle.embed.process.extract.ITempNaming;
-import de.flapdoodle.embed.process.extract.produce.IDestinationFileProducer;
-import de.flapdoodle.embed.process.extract.produce.TempFileNamingProducer;
+import de.flapdoodle.embed.process.extract.mapper.IDestinationFileMapper;
+import de.flapdoodle.embed.process.extract.mapper.TempFileMapper;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
 
 public class ArtifactStoreBuilder extends AbstractBuilder<IArtifactStore> {
 	private static Logger logger = Logger.getLogger(ArtifactStoreBuilder.class.getName());
 
 	private static final TypedProperty<ITempNaming> EXECUTABLE_NAMING = TypedProperty.with("ExecutableNaming",ITempNaming.class);
-    private static final TypedProperty<IDestinationFileProducer> DEST_FILE_PRODUCER = TypedProperty.with("DestinationFileProducer",IDestinationFileProducer.class);
+    private static final TypedProperty<IDestinationFileMapper> DEST_FILE_PRODUCER = TypedProperty.with("DestinationFileProducer",IDestinationFileMapper.class);
 	private static final TypedProperty<IDirectory> TEMP_DIR_FACTORY = TypedProperty.with("TempDir",IDirectory.class);
 	private static final TypedProperty<IDownloadConfig> DOWNLOAD_CONFIG = TypedProperty.with("DownloadConfig",IDownloadConfig.class);
 	private static final TypedProperty<Boolean> USE_CACHE = TypedProperty.with("UseCache",Boolean.class);
@@ -72,16 +70,16 @@ public class ArtifactStoreBuilder extends AbstractBuilder<IArtifactStore> {
 	@Deprecated
     public ArtifactStoreBuilder executableNaming(ITempNaming execNaming) {
 		set(EXECUTABLE_NAMING,execNaming);
-        set(DEST_FILE_PRODUCER, new TempFileNamingProducer(execNaming));
+        set(DEST_FILE_PRODUCER, new TempFileMapper(execNaming));
 		return this;
 	}
 
-    public ArtifactStoreBuilder destinationFileProducer(IDestinationFileProducer destProducer) {
+    public ArtifactStoreBuilder destinationFileProducer(IDestinationFileMapper destProducer) {
         set(DEST_FILE_PRODUCER, destProducer);
         return this;
     }
 
-    public IProperty<IDestinationFileProducer> destinationFileProducer() {
+    public IProperty<IDestinationFileMapper> destinationFileProducer() {
         return property(DEST_FILE_PRODUCER);
     }
 

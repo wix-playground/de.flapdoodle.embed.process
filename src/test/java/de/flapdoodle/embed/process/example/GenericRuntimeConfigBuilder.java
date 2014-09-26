@@ -20,14 +20,10 @@
  */
 package de.flapdoodle.embed.process.example;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
 
-import de.flapdoodle.embed.process.extract.produce.TempFileNamingProducer;
-import org.omg.CORBA._PolicyStub;
+import de.flapdoodle.embed.process.extract.mapper.TempFileMapper;
 
 import de.flapdoodle.embed.process.builder.AbstractBuilder;
 import de.flapdoodle.embed.process.builder.AbstractEmbeddedBuilder;
@@ -107,7 +103,7 @@ public class GenericRuntimeConfigBuilder extends AbstractBuilder<IRuntimeConfig>
                             .progressListener(new StandardConsoleProgressListener())
                             .userAgent("Mozilla/5.0 (compatible; embedded " + name + "; +https://github.com/flapdoodle-oss/de.flapdoodle.embed.process)"))
                     .tempDir(new PropertyOrPlatformTempDir())
-                    .destinationFileProducer(new TempFileNamingProducer(new UUIDTempNaming())))
+                    .destinationFileProducer(new TempFileMapper(new UUIDTempNaming())))
 			.processOutput(ProcessOutput.getDefaultInstance(name))
 			.commandLinePostProcessor(new ICommandLinePostProcessor.Noop()).build();
 	}

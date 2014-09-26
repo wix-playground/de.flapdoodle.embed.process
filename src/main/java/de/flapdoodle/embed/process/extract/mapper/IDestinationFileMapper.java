@@ -18,36 +18,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.flapdoodle.embed.process.extract.produce;
+package de.flapdoodle.embed.process.extract.mapper;
 
 import de.flapdoodle.embed.process.config.store.FileSet;
 import de.flapdoodle.embed.process.extract.IArchiveEntry;
-import de.flapdoodle.embed.process.extract.ITempNaming;
 
 /**
  * @author viliusl
  * @since 25/09/14
  */
-public class TempFileNamingProducer implements IDestinationFileProducer {
+public interface IDestinationFileMapper {
 
-    private final ITempNaming namingStrategy;
-
-    public TempFileNamingProducer(final ITempNaming executableNaming) {
-        namingStrategy = executableNaming;
-    }
-
-    @Override
-    public DestinationEntry fromSource(IArchiveEntry archiveEntry, FileSet.Entry fileSetEntry) {
-        String relPath;
-        switch (fileSetEntry.type()) {
-            case Executable:
-                relPath = namingStrategy.nameFor("extract", fileSetEntry.destination());
-                break;
-            default:
-                relPath = fileSetEntry.destination();
-                break;
-        }
-
-        return new DestinationEntry(fileSetEntry.type(), relPath, false);
-    }
+    /**
+     * Create target file entry.
+     *
+     * @param archiveEntry entry in archive
+     * @param fileSetEntry fileSet entry against which archive entry was matched.
+     * @return created empty file.
+     * @throws java.io.IOException
+     */
+    DestinationEntry fromSource(IArchiveEntry archiveEntry, FileSet.Entry fileSetEntry);
 }

@@ -23,8 +23,8 @@ package de.flapdoodle.embed.process.extract;
 import de.flapdoodle.embed.process.config.store.FileSet;
 import de.flapdoodle.embed.process.config.store.FileSet.Entry;
 import de.flapdoodle.embed.process.config.store.FileType;
-import de.flapdoodle.embed.process.extract.produce.DestinationEntry;
-import de.flapdoodle.embed.process.extract.produce.IDestinationFileProducer;
+import de.flapdoodle.embed.process.extract.mapper.DestinationEntry;
+import de.flapdoodle.embed.process.extract.mapper.IDestinationFileMapper;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.io.file.FileAlreadyExistsException;
 import de.flapdoodle.embed.process.io.file.Files;
@@ -37,19 +37,19 @@ import java.util.ArrayList;
 public class FilesToExtract {
 
 	private final ArrayList<FileSet.Entry> _files;
-    private final IDestinationFileProducer _producer;
+    private final IDestinationFileMapper _mapper;
 	private final File _dirFactoryResult;
 	private final boolean _dirFactoryResultIsGenerated;
 
-	public FilesToExtract(IDirectory dirFactory, IDestinationFileProducer producer, FileSet fileSet) {
+	public FilesToExtract(IDirectory dirFactory, IDestinationFileMapper mapper, FileSet fileSet) {
 		if (dirFactory==null) throw new NullPointerException("dirFactory is NULL");
-		if (producer==null) throw new NullPointerException("producer is NULL");
+		if (mapper==null) throw new NullPointerException("producer is NULL");
 		if (fileSet==null) throw new NullPointerException("fileSet is NULL");
 		
 		_files = new ArrayList<FileSet.Entry>(fileSet.entries());
 		_dirFactoryResult = dirFactory.asFile();
 		_dirFactoryResultIsGenerated=dirFactory.isGenerated();
-		_producer = producer;
+		_mapper = mapper;
 	}
 
 	public File generatedBaseDir() {
@@ -75,23 +75,23 @@ public class FilesToExtract {
 				_files.remove(found);
 			}
 		}
-		return found != null ? new Match(_dirFactoryResult, _producer, entry, found) : null;
+		return found != null ? new Match(_dirFactoryResult, _mapper, entry, found) : null;
 	}
 
     static class Match implements IExtractionMatch {
 
         private final Entry _fileSetEntry;
         private final IArchiveEntry _archiveEntry;
-        private final IDestinationFileProducer _producer;
+        private final IDestinationFileMapper _mapper;
         private final File _dirFactoryResult;
 
         public Match(
                 final File dirFactoryResult,
-                final IDestinationFileProducer producer,
+                final IDestinationFileMapper mapper,
                 final IArchiveEntry archiveEntry,
                 final Entry fileSetEntry) {
             _dirFactoryResult = dirFactoryResult;
-            _producer = producer;
+            _mapper = mapper;
             _fileSetEntry = fileSetEntry;
             _archiveEntry = archiveEntry;
         }
@@ -103,7 +103,7 @@ public class FilesToExtract {
 
         @Override
         public File write(InputStream source, long size) throws IOException {
-            DestinationEntry destination = _producer.fromSource(_archiveEntry, _fileSetEntry);
+            DestinationEntry destination = _mapper.fromSource(_archiveEntry, _fileSetEntry);
             File result;
 
             switch (destination.type()) {

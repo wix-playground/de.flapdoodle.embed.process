@@ -22,7 +22,7 @@ package de.flapdoodle.embed.process.extract;
 
 import de.flapdoodle.embed.process.config.store.*;
 import de.flapdoodle.embed.process.example.GenericPackageResolver;
-import de.flapdoodle.embed.process.extract.produce.TempFileNamingProducer;
+import de.flapdoodle.embed.process.extract.mapper.TempFileMapper;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.io.directories.PlatformTempDir;
 import de.flapdoodle.embed.process.io.progress.StandardConsoleProgressListener;
@@ -66,7 +66,7 @@ public class ExtractorImplTest {
 
         fte = new FilesToExtract(
                 new TempDir(folder),
-                new TempFileNamingProducer(new UUIDTempNaming()),
+                new TempFileMapper(new UUIDTempNaming()),
                 FileSet.builder().addEntry(FileType.Executable, "readme.txt").build());
         fileInArchive = new File(this.getClass().getResource("/archives/readme.txt").getPath());
     }

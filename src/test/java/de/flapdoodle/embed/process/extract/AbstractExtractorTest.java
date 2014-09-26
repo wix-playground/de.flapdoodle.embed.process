@@ -23,8 +23,8 @@ package de.flapdoodle.embed.process.extract;
 import de.flapdoodle.embed.process.config.store.*;
 import de.flapdoodle.embed.process.config.store.FileSet.Entry;
 import de.flapdoodle.embed.process.example.GenericPackageResolver;
-import de.flapdoodle.embed.process.extract.produce.IDestinationFileProducer;
-import de.flapdoodle.embed.process.extract.produce.TempFileNamingProducer;
+import de.flapdoodle.embed.process.extract.mapper.IDestinationFileMapper;
+import de.flapdoodle.embed.process.extract.mapper.TempFileMapper;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.io.directories.PlatformTempDir;
 import de.flapdoodle.embed.process.io.progress.StandardConsoleProgressListener;
@@ -56,7 +56,7 @@ public class AbstractExtractorTest {
 			.build();
 		
 		IDirectory factory=new PlatformTempDir();
-        IDestinationFileProducer destProducer = new TempFileNamingProducer(new UUIDTempNaming());
+        IDestinationFileMapper destProducer = new TempFileMapper(new UUIDTempNaming());
 		List<Entry> entries=new ArrayList<Entry>();
 		entries.add(new Entry(FileType.Executable, "foo-bar.exe", Pattern.compile(".")));
 		FileSet fileSet=new FileSet(entries);

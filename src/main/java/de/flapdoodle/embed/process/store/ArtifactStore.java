@@ -22,28 +22,18 @@ package de.flapdoodle.embed.process.store;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 import de.flapdoodle.embed.process.config.store.FileType;
 import de.flapdoodle.embed.process.config.store.IDownloadConfig;
-import de.flapdoodle.embed.process.config.store.ILibraryStore;
 import de.flapdoodle.embed.process.config.store.IPackageResolver;
 import de.flapdoodle.embed.process.distribution.Distribution;
-import de.flapdoodle.embed.process.distribution.Platform;
 import de.flapdoodle.embed.process.extract.Extractors;
 import de.flapdoodle.embed.process.extract.FilesToExtract;
 import de.flapdoodle.embed.process.extract.IExtractedFileSet;
 import de.flapdoodle.embed.process.extract.IExtractor;
-import de.flapdoodle.embed.process.extract.ITempNaming;
-import de.flapdoodle.embed.process.extract.produce.IDestinationFileProducer;
+import de.flapdoodle.embed.process.extract.mapper.IDestinationFileMapper;
 import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.io.file.Files;
 
@@ -53,9 +43,9 @@ public class ArtifactStore implements IArtifactStore {
 
 	private IDownloadConfig _downloadConfig;
 	private IDirectory _tempDirFactory;
-    private IDestinationFileProducer _destinationFileProducer;
+    private IDestinationFileMapper _destinationFileProducer;
 	
-	public ArtifactStore(IDownloadConfig downloadConfig,IDirectory tempDirFactory, IDestinationFileProducer destinationFileProducer) {
+	public ArtifactStore(IDownloadConfig downloadConfig,IDirectory tempDirFactory, IDestinationFileMapper destinationFileProducer) {
 		_downloadConfig=downloadConfig;
 		_tempDirFactory = tempDirFactory;
         _destinationFileProducer = destinationFileProducer;

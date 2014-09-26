@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.flapdoodle.embed.process.extract.produce;
+package de.flapdoodle.embed.process.extract.mapper;
 
 import de.flapdoodle.embed.process.config.store.FileType;
 
