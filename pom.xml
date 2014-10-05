@@ -11,7 +11,7 @@
     <groupId>de.flapdoodle.embed</groupId>
     <artifactId>de.flapdoodle.embed.process</artifactId>
     <name>Flapdoodle Embedded Process Util</name>
-    <version>1.40.2-SNAPSHOT-WIX</version>
+    <version>1.40.2-SNAPSHOT-WIX-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <description>A embedded process starter ...</description>
