@@ -8,10 +8,10 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>de.flapdoodle.embed</groupId>
+    <groupId>com.wixpress.flapdoodle.process</groupId>
     <artifactId>com.wixpress.flapdoodle.process</artifactId>
     <name>Flapdoodle Embedded Process Util</name>
-    <version>1.40.2-SNAPSHOT-WIX-SNAPSHOT</version>
+    <version>1.40.2-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <description>A embedded process starter ...</description>
