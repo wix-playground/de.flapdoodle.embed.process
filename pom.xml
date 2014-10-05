@@ -9,7 +9,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.flapdoodle.embed</groupId>
-    <artifactId>de.flapdoodle.embed.process</artifactId>
+    <artifactId>com.wixpress.flapdoodle.process</artifactId>
     <name>Flapdoodle Embedded Process Util</name>
     <version>1.40.2-SNAPSHOT-WIX-SNAPSHOT</version>
     <packaging>bundle</packaging>
